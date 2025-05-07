@@ -25,6 +25,7 @@ const userSchema = new Schema(
         phone:{
             type:Number,
             trim:true,
+            required:true,
             minLength:10    
         },
         address:{
