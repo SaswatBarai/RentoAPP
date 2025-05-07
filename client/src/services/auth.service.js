@@ -1,6 +1,4 @@
-<<<<<<< HEAD:cilent/src/services/auth.service.js
-=======
-/* eslint-disable no-unused-vars */
+
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -73,4 +71,4 @@ const useFetch = (url,options={}) =>{
 
     return [data,loading,error];
 }
->>>>>>> 3dc9a161790ce6a8ca09f88d7f4de40af4df006f:client/src/services/auth.service.js
+
