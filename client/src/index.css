@@ -1,6 +1,9 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @plugin "tailwindcss-animate";
+
+@import "tailwindcss";
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -37,6 +40,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.623 0.214 259.815);
+  --font-family: 'Poppins', sans-serif;
 }
 
 .dark {
@@ -72,7 +76,6 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.488 0.243 264.376);
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -114,10 +117,14 @@
 }
 
 @layer base {
+  html {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 font-[var(--font-family)];
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 }
