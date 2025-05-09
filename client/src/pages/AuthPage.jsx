@@ -1,28 +1,26 @@
 import { LoginForm } from "@/components/auth/LoginForm"
-import LogoCard from "@/components/auth/LogoCard"
+import { LogoCard } from "@/components/auth/LogoCard"
 import { RegisterForm } from "@/components/auth/RegisterForm"
 import { useState } from "react"
 
 export const AuthPage = () => {
     const [isFlipped, setIsFlipped] = useState(false)
 
-    return (
-        <div className="min-h-screen w-full flex justify-center items-center p-2 sm:p-4">
-            <div
-                id="main-div"
-                className="bg-amber-500 w-full md:w-4/6 min-h-[500px] flex justify-center shadow-2xl rounded-[20px] md:rounded-[40px] relative overflow-hidden"
-            >
-                <div 
-                    className="flex w-full transition-transform duration-700 ease-in-out relative"
-                    style={{ transform: isFlipped ? 'translateX(-50%)' : 'translateX(0)', touchAction: 'pan-y pinch-zoom' }}
+    return(
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <div className="w-full md:w-4/5 lg:w-4/6 h-[600px] rounded-lg shadow-2xl relative overflow-hidden bg-white">
+                <div
+                    className={`flex w-full h-full transition-transform duration-700 ease-in-out ${
+                        isFlipped ? 'md:translate-x-[-50%] translate-x-[-100%]'  : 'translate-x-0'
+                    }`}
                 >
-                    <div className="min-w-full flex justify-center">
-                        <LoginForm setIsFlipped={setIsFlipped} />
-                        <LogoCard className="hidden md:flex" />
+                    <div className="min-w-full flex">
+                        <LoginForm setIsFlipped={setIsFlipped} className="w-full lg:w-1/2" />
+                        <LogoCard className="hidden lg:flex flex-1" />
                     </div>
-                    <div className="min-w-full flex justify-center absolute left-full">
-                        <RegisterForm setIsFlipped={setIsFlipped} />
-                        <LogoCard className="hidden md:flex" />
+                    <div className="min-w-full flex absolute left-full">
+                        <RegisterForm setIsFlipped={setIsFlipped} className="w-full lg:w-1/2" />
+                        <LogoCard className="hidden lg:flex flex-1" />
                     </div>
                 </div>
             </div>

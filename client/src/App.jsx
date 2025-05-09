@@ -1,5 +1,6 @@
 import React from 'react'
 import { AuthPage } from './pages/AuthPage'
+import { ToastContainer } from 'react-toastify';
 
 
 
@@ -7,7 +8,15 @@ import { AuthPage } from './pages/AuthPage'
 function App() {
   return (
     <div >
-      <AuthPage/>
+      <ToastContainer />
+      <AuthPage />
+      
+      {/* <LoginForm /> */}
+      {/* <RegisterForm /> */}
+      {/* <Dashboard /> */}
+      {/* <Profile /> */}
+      {/* <Settings /> */}
+      {/* <NotFound /> */}
     </div>
   )
 }
