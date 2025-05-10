@@ -28,6 +28,28 @@ api.interceptors.request.use(
 );
 
 
+api.interceptors.response.use(
+    (response) =>{
+        return response;
+    },
+    async (error) =>{
+        const originalRequest = error.config;
+        if(error.response.status === 401 && !originalRequest._retry){
+            originalRequest._retry = true;
+            try {
+                const response = await api.get("");
+                localStorage.setItem("accessToken", response.data.accessToken);
+                return api(originalRequest);
+            } catch (err) {
+                console.error("Error refreshing token", err);
+                return Promise.reject(err);
+            }
+        }
+        return Promise.reject(error);
+    }
+)
+
+
 const useFetch = (url,options={}) =>{
     const {
         method = "GET",
@@ -71,4 +93,6 @@ const useFetch = (url,options={}) =>{
 
     return [data,loading,error];
 }
+
+
 

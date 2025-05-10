@@ -2,10 +2,16 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userModel from "../models/users-model.js";
-import ApiError from "../utils/ApiError.js";
-import { generator } from "generate-password";
+import { ApiError } from "../utils/ApiError.js";
+import generatePassword from "generate-password";
+import dotenv from "dotenv";
+dotenv.config();
 
-passport.use(  new LocalStrategy(
+// Replace the destructured import with the correct usage
+const generate = generatePassword.generate;
+
+passport.use(
+  new LocalStrategy(
     { usernameField: "email" },
     async (email, password, done) => {
       try {
@@ -26,6 +32,7 @@ passport.use(  new LocalStrategy(
   )
 );
 
+
 passport.use(
   new GoogleStrategy(
     {
@@ -39,14 +46,15 @@ passport.use(
         let user = await userModel.findOne({ email: profile?.emails[0].value });
         if (user) {
           return done(null, user);
-        }        user = await userModel.create({
+        }
+        user = await userModel.create({
           fullname: profile.displayName,
           email: profile.emails[0].value,
-          password: generator.generate({
+          password: generate({
             length: 10,
             numbers: true,
           }),
-          phone: "", 
+          phone: "",
           role: "user",
         });
         return done(null, user);

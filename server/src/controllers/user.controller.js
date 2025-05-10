@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import userModel from "../models/users-model.js";
 import passport from "passport";
+import jwt from "jsonwebtoken";
 
 const generateTokens = async (userId) => {
   try {
@@ -29,19 +30,21 @@ const generateTokens = async (userId) => {
 const register = asyncHandler(async (req, res) => {
   try {
     const { fullname, email, phone, password } = req.body;
+    console.log(req.body);
+    
     if ([fullname, email, phone, password].some((val) => val?.trim() === "")) {
       throw new ApiError(400, "All fields are required");
     }
 
-    const existUser = userModel.findOne({
+    const existUser = await userModel.findOne({
       $or: [{ phone }, { email }],
     });
 
     if (existUser) {
-      throw new ApiError(400, "Something went wrong");
+      throw new ApiError(400, "User with this email or phone already exists");
     }
 
-    const newUser = await userModel({
+    const newUser = await userModel.create({
       fullname,
       email,
       phone,
@@ -63,6 +66,7 @@ const register = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, createdUser, "User register successfully"));
   } catch (error) {
+    console.error("Registration error:", error);
     throw new ApiError(500, "Server Failed");
   }
 });
@@ -70,7 +74,8 @@ const register = asyncHandler(async (req, res) => {
 //Local Strategy
 
 const loginUser = asyncHandler(async (req, res, next) => {
-  passport.authenticate("local", async (err, user, info) => {
+  // Execute passport.authenticate with req, res, next
+  passport.authenticate("local", { session: false }, async (err, user, info) => {
     try {
       if (err) {
         return next(err);
@@ -107,9 +112,10 @@ const loginUser = asyncHandler(async (req, res, next) => {
           )
         );
     } catch (error) {
+      console.error("Login error:", error);
       throw new ApiError(500, "Server Failed");
     }
-  });
+  })(req, res, next); 
 });
 
 const googleCallback = asyncHandler(async (req, res) => {
@@ -156,26 +162,37 @@ const logout = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
+    
+    // Clear the cookies with the JWT tokens
     res.clearCookie("accessToken", options);
     res.clearCookie("refreshToken", options);
 
-    req.logout(function (err) {
-      if (err) {
-        throw new ApiError(200, "Error during logout");
-      }
+    // If using JWT, update the user's refresh token in the database to invalidate it
+    // This step is optional but recommended for security
+    if (req.user?._id) {
+      await userModel.findByIdAndUpdate(
+        req.user._id,
+        {
+          $set: { refreshToken: null }
+        }
+      );
+    }
 
-      return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Logged out successfully"));
-    });
+    // Send success response
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Logged out successfully"));
+      
   } catch (error) {
-    throw new ApiError(500, "Server Failed");
+    console.error("Logout error:", error);
+    throw new ApiError(500, "Error during logout");
   }
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies?.refreshToken || req.body?.refreshToken;
+    
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized request");

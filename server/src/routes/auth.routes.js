@@ -1,6 +1,7 @@
 import express from "express";
 import passport from "passport";
 import {authMiddleware} from "../middlewares/auth-middleware.js"
+import{loginValidator,registerValidator} from "../validator/auth-validator.js"
 
 const router = express.Router();
 
@@ -10,10 +11,9 @@ const router = express.Router();
 import {register,loginUser,googleCallback,logout,refreshAccessToken} from "../controllers/user.controller.js"
 
 
-
-router.post("/login",loginUser);
-router.post("/register",register);
-router.post("/get-accessToken",refreshAccessToken);
+router.post("/login", loginValidator, loginUser);
+router.post("/register", registerValidator, register);
+router.get("/get-accessToken",refreshAccessToken);
 
 // Google OAuth routes
 router.get(
@@ -23,11 +23,11 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: true, failureRedirect: "/login" }),
+  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
   googleCallback
 );
 
 // Logout route
-router.get("/logout",authMiddleware,logout);
+router.post("/logout",authMiddleware,logout);
 
 export default router;
