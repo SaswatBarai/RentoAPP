@@ -25,8 +25,8 @@ const userSchema = new Schema(
         phone:{
             type:Number,
             trim:true,
-            required:true,
-            minLength:10    
+            minLength:10,
+            unique:true  
         },
         address:{
             street:String,
@@ -50,6 +50,9 @@ const userSchema = new Schema(
             enum:["admin","user"],
             default:"user"
         },
+        refreshToken:{
+            type:String
+        }
 
     },
     {
@@ -67,7 +70,7 @@ userSchema.pre("save",async function (password){
 })
 
 
-userSchema.method.generateAcessToken = async function(){
+userSchema.methods.generateAcessToken = async function(){
     return await jwt.sign(
         {
             _id:this._id,
@@ -76,24 +79,24 @@ userSchema.method.generateAcessToken = async function(){
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn:ACCESS_TOKEN_EXPIRE
+            expiresIn:process.env.ACCESS_TOKEN_EXPIRE
         }
     )
 }
 
-userSchema.method.genrateRefreshToken = async function (){
+userSchema.methods.genrateRefreshToken = async function (){
     return await jwt.sign(
         {
             _id:this._id
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn:REFRESH_TOKEN_EXPIRE
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRE
         }
     )
 }
 
-userSchema.method.MatchPassword = async function (password){
+userSchema.methods.MatchPassword = async function (password){
     return await bcrypt.compare(password,this.password);
 }
 

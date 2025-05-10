@@ -65,7 +65,7 @@ const useFetch = (url,options={}) =>{
             setLoading(false);
            }
         }
-
+        
         fetchData();
     },[url,body, method, params])
 
