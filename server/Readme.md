@@ -181,38 +181,81 @@ Redirect the browser to the backend endpoint to start the flow. Example:
 
 ## Frontend Integration Guide
 
-Use `fetch` or `axios` with `credentials: 'include'` to handle cookies.
+Configure your frontend to communicate securely with the Auth API:
 
-#### Example using `fetch`
-```javascript
-fetch('http://localhost:5000/api/auth/user/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-  body: JSON.stringify({ email: 'john@example.com', password: 'password123' })
-})
-  .then(async res => {
-    const body = await res.json();
-    if (!res.ok) throw new Error(body.message);
-    console.log('Logged in user:', body.data.user);
-  })
-  .catch(err => console.error('Error:', err.message));
+1. Set your base URL in `.env`:
+```env
+VITE_API_URL=http://localhost:5000/api/auth/user
 ```
 
-#### Example using `axios`
+2. Use the shared Axios instance (`client/src/services/auth.service.js`):
 ```javascript
 import axios from 'axios';
-axios.defaults.withCredentials = true;
 
-axios.post('http://localhost:5000/api/auth/user/register', {
-  fullname: 'John Doe',
-  email: 'john@example.com',
-  phone: '1234567890',
-  password: 'password123'
-})
-.then(response => console.log(response.data))
-.catch(error => console.error(error.response.data));
+const API_URL = import.meta.env.VITE_API_URL;
+axios.defaults.withCredentials = true;
+const api = axios.create({ baseURL: API_URL });
+
+// Attach Authorization header from localStorage
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('accessToken');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+export default api;
 ```
+
+3. Register a new user:
+```javascript
+import api from './auth.service';
+
+const register = async (user) => {
+  const response = await api.post('/register', user);
+  return response.data.data;  // created user object
+};
+```
+
+4. Login and store tokens:
+```javascript
+const login = async (credentials) => {
+  const response = await api.post('/login', credentials);
+  const { accessToken, refreshToken, user } = response.data.data;
+  localStorage.setItem('accessToken', accessToken);
+  return user;
+};
+```
+
+5. Refresh access token:
+```javascript
+const refresh = async () => {
+  const response = await api.post('/get-accessToken');
+  const { accessToken, refreshToken } = response.data.data;
+  localStorage.setItem('accessToken', accessToken);
+  return accessToken;
+};
+```
+
+6. Google OAuth flow:
+```javascript
+const googleSignIn = () => {
+  window.location.href = `${import.meta.env.VITE_API_URL}/google`;
+};
+```
+
+7. Logout:
+```javascript
+const logout = async () => {
+  await api.get('/logout');
+  localStorage.removeItem('accessToken');
+};
+```
+
+8. Optional React hook for data fetching (`useFetch` in `auth.service.js`):
+```javascript
+const [data, loading, error] = useFetch('/some-protected-route', { method: 'GET' });
+```
+
+This setup ensures HTTP-only cookies for refresh flows, a persistent access token header, and simple calls for all auth endpoints.
 
 ## Error Format
 All error responses follow:
