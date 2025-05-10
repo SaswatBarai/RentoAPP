@@ -1,9 +1,19 @@
 import express from "express";
 import passport from "passport";
-import { googleCallback } from "../controllers/user.controller.js";
-import { logout } from "../controllers/auth.controller.js";
+import {authMiddleware} from "../middlewares/auth-middleware.js"
 
 const router = express.Router();
+
+
+
+//Routes imports
+import {register,loginUser,googleCallback,logout,refreshAccessToken} from "../controllers/user.controller.js"
+
+
+
+router.post("/login",loginUser);
+router.post("/register",register);
+router.post("/get-accessToken",refreshAccessToken);
 
 // Google OAuth routes
 router.get(
@@ -18,6 +28,6 @@ router.get(
 );
 
 // Logout route
-router.get("/logout", logout);
+router.get("/logout",authMiddleware,logout);
 
 export default router;
