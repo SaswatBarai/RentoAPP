@@ -1,8 +1,8 @@
 import React, { forwardRef, useState } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/auth/button'
+import { Input } from '@/components/auth/input'
 import { cn } from '@/lib/utils'
 
 const PasswordInput = forwardRef((props, ref) => {

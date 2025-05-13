@@ -5,11 +5,13 @@ import "react-toastify/dist/ReactToastify.css"; // Add CSS import
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import { GoogleAuthWrapper } from "./Wrapper/GoogleAuthWrapper";
+import { Navbar1 } from "./components/navbar1";
 
 function App() {
   return (
     <>
       <ToastContainer />
+      <Navbar1 />
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
