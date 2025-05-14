@@ -6,6 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import { GoogleAuthWrapper } from "./Wrapper/GoogleAuthWrapper";
 import { Navbar1 } from "./components/navbar1";
+import { PageNotFound } from "./pages/PageNotFound";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             </GoogleAuthWrapper>
           }
         />
+        <Route path="*" element={<PageNotFound/>}/> 
       </Routes>
     </>
   );
