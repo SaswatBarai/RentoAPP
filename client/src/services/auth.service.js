@@ -76,21 +76,8 @@ export const AuthService = {
     }
   },
   login: async (email, password) => {
-    try {
-      const response = await api.post("/user/login", { email, password });
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      return {
-        success: true,
-        accessToken: response.data.accessToken,
-        data: { user: response.data.user },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message,
-      };
-    }
+    const res = await api.post("/user/login", { email, password })
+    return res.data;
   },
   logout: async () => {
     try {

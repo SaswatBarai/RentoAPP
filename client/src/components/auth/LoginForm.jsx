@@ -5,6 +5,8 @@ import { AuthService } from "@/services/auth.service";
 import { toast, Bounce } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useLogin } from "@/queries/authQueries";
+
 
 export const LoginForm = ({ setIsFlipped, className = "" }) => {
 
@@ -89,35 +91,8 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
       return;
     }
 
-    const result = await AuthService.login(data.email, data.password);
-    console.log(result.success);
-    
-    if (result.success) {
-      toast.success("Login successful", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce,
-      });
-      navigate("/home");
-    } else {
-      toast.error("Login failed", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce,
-      });
-    }
+    const {mutate,isPending} = useLogin();
+    mutate(data.email,data.password);
   };
 
   // Google Login handler using @react-oauth/google
@@ -227,7 +202,7 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
           />
 
           <button className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-            Login
+      
           </button>
           <div>
             <div className="flex items-center justify-between text-sm">
