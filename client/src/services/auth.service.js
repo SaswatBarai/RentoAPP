@@ -77,7 +77,7 @@ export const AuthService = {
   },
   login: async (email, password) => {
     const res = await api.post("/user/login", { email, password })
-    return res.data;
+    return res.data
   },
   logout: async () => {
     try {

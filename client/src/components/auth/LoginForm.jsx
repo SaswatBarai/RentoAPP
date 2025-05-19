@@ -2,21 +2,23 @@ import { useState } from "react";
 import { Input } from "@/components/auth/input";
 import { PasswordInput } from "./PasswordInput";
 import { AuthService } from "@/services/auth.service";
+
 import { toast, Bounce } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useLogin } from "@/queries/authQueries";
+import { useGoogle, useLogin } from "@/queries/authQueries";
 
 
 export const LoginForm = ({ setIsFlipped, className = "" }) => {
-
-
+  
   const navigate = useNavigate();
   const [data, setData] = useState({
     email: "",
     password: "",
   });
-
+  const {mutate: login, isPending} = useLogin();
+  const {mutate:loginWithGoogle} = useGoogle();
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -27,11 +29,11 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
       [name]: value,
     }));
   };
-
+  
   const validateIdentifer = (value) => {
     // Email regex pattern
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    
     if (emailPattern.test(value)) {
       return {
         isValid: true,
@@ -45,7 +47,7 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
   };
 
   const handleSubmit = async (e) => {
-    
+
     e.preventDefault();
     if (!data.email) {
       toast.error("Please enter your email", {
@@ -90,76 +92,15 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
       });
       return;
     }
-
-    const {mutate,isPending} = useLogin();
-    mutate(data.email,data.password);
+    await login(data.email, data.password);
+    navigate("/home");
   };
 
   // Google Login handler using @react-oauth/google
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
-      try {
-        const accessToken = response["access_token"];
-        console.log("Google access token:", response);
-        
-        if (!accessToken) {
-          toast.error("Failed to get access token from Google", {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Bounce,
-          });
-          return;
-        }
-        
-        const result = await AuthService.loginWithGoogle(accessToken);
-        console.log("Login result:", result);
-        
-        if (result && result.success) {
-          toast.success("Google login successful", {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Bounce,
-          });
-          navigate("/home");
-        } else {
-          toast.error(result.message || "Google login failed", {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Bounce,
-          });
-        }
-      } catch (error) {
-        toast.error("Google login failed", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
-        console.error("Google login error:", error);
-      }
+      const accessToken = response["access_token"];
+      loginWithGoogle(accessToken);
     },
     onError: (error) => {
       toast.error(error.message, {
@@ -202,7 +143,7 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
           />
 
           <button className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-      
+            {isPending ? "Loading..":"Login"} 
           </button>
           <div>
             <div className="flex items-center justify-between text-sm">
