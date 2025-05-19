@@ -4,15 +4,9 @@ import { PasswordInput } from "./PasswordInput"
 import { AuthService } from "@/services/auth.service"
 import { toast } from "react-toastify"
 import { Bounce } from "react-toastify"
-import { authStatusAtom, userDataAtom, accesTokenAtom } from "../../state/atoms/authAtoms.js";
-import { useSetRecoilState } from "recoil";
 import { useGoogleLogin } from "@react-oauth/google"
 
 export const RegisterForm = ({ setIsFlipped, className = "" }) => {
-    const setAuthStatus = useSetRecoilState(authStatusAtom);
-    const setUserData = useSetRecoilState(userDataAtom);
-    const setAccessToken = useSetRecoilState(accesTokenAtom);
-    
     const [data, setData] = useState({
         email: "",
         fullname: "",
@@ -161,9 +155,6 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
         }
         
         if (result.success) {
-            setAuthStatus(true);
-            setAccessToken(result.accessToken)
-            setUserData(result.data.user)
             console.log("done");
             
             toast.success('Registration successful', {

@@ -4,18 +4,10 @@ import { PasswordInput } from "./PasswordInput";
 import { AuthService } from "@/services/auth.service";
 import { toast, Bounce } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import {
-  authStatusAtom,
-  userDataAtom,
-  accesTokenAtom,
-} from "../../state/atoms/authAtoms.js";
-import { useSetRecoilState } from "recoil";
 import { useGoogleLogin } from "@react-oauth/google";
 
 export const LoginForm = ({ setIsFlipped, className = "" }) => {
-  const setAuthStatus = useSetRecoilState(authStatusAtom);
-  const setUserData = useSetRecoilState(userDataAtom);
-  const setAccessToken = useSetRecoilState(accesTokenAtom);
+
 
   const navigate = useNavigate();
   const [data, setData] = useState({
@@ -101,9 +93,6 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
     console.log(result.success);
     
     if (result.success) {
-      setAuthStatus(true);
-      setAccessToken(result.accessToken);
-      setUserData(result.data.user);
       toast.success("Login successful", {
         position: "top-center",
         autoClose: 5000,
@@ -157,9 +146,6 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
         console.log("Login result:", result);
         
         if (result && result.success) {
-          setAuthStatus(true);
-          setAccessToken(result.accessToken);
-          setUserData(result.data.user);
           toast.success("Google login successful", {
             position: "top-center",
             autoClose: 5000,
