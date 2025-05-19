@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Input } from "@/components/auth/input";
 import { PasswordInput } from "./PasswordInput";
-import { AuthService } from "@/services/auth.service";
 
 import { toast, Bounce } from "react-toastify";
 import { useNavigate } from "react-router-dom";

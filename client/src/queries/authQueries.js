@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 export const useLogin = () => {
   const dispatch = useDispatch();
   return useMutation({
-    mutationFn: AuthService.login,
+    mutationFn: (email,password) => AuthService.login(email,password),
     onSuccess: (data) => {
       localStorage("accessToken", data.accessToken);
       localStorage("user", data.user);
@@ -35,7 +35,7 @@ export const useGoogle = () => {
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: AuthService.loginWithGoogle,
+    mutationFn: (accessToken) => AuthService.loginWithGoogle(accessToken),
     onSuccess: (data) => {
       localStorage("accessToken", data.accessToken);
       localStorage("user", data.user);
