@@ -60,24 +60,23 @@ api.interceptors.response.use(
 
 // Direct service methods without React hooks
 export const AuthService = {
-  register: async (userData) => {
-    try {
+register: async (userData) => {
       const response = await api.post("/user/register", userData);
-      return {
-        success: true,
-        accessToken: response.data.accessToken,
-        data: response.data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message,
-      };
-    }
+      console.log(response);
+      
+      
   },
-  login: async (email, password) => {
-    const res = await api.post("/user/login", { email, password })
-    return res.data
+ login: async (email, password) => {
+    try {
+      const res = await api.post("/user/login", { email, password });
+      return res.data;
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data.message || "Login failed");
+      }
+      throw new Error(error.message || "Network error during login");
+    }
   },
   logout: async () => {
     try {

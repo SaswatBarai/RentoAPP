@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Input } from "@/components/auth/input";
 import { PasswordInput } from "./PasswordInput";
-
 import { toast, Bounce } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -11,10 +10,13 @@ import { useGoogle, useLogin } from "@/queries/authQueries";
 export const LoginForm = ({ setIsFlipped, className = "" }) => {
   
   const navigate = useNavigate();
+
   const [data, setData] = useState({
     email: "",
     password: "",
   });
+
+
   const {mutate: login, isPending} = useLogin();
   const {mutate:loginWithGoogle} = useGoogle();
   
@@ -91,15 +93,25 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
       });
       return;
     }
-    await login(data.email, data.password);
-    navigate("/home");
+    
+    // Pass credentials as a single object and handle navigation in onSuccess
+    login({ email: data.email, password: data.password }, {
+      onSuccess: () => {
+        navigate("/home");
+      },
+    });
+
   };
 
   // Google Login handler using @react-oauth/google
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response["access_token"];
-      loginWithGoogle(accessToken);
+      loginWithGoogle(accessToken, {
+        onSuccess: () => {
+          navigate("/home");
+        }
+      });
     },
     onError: (error) => {
       toast.error(error.message, {
@@ -117,6 +129,8 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
     },
     flow: "implicit",
   });
+
+
 
   return (
     <div
@@ -141,7 +155,11 @@ export const LoginForm = ({ setIsFlipped, className = "" }) => {
             placeholder="Enter Your Password"
           />
 
-          <button className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+          <button 
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+          >
             {isPending ? "Loading..":"Login"} 
           </button>
           <div>

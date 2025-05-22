@@ -1,5 +1,5 @@
 import express from "express";
-import passport from "passport";
+
 import {authMiddleware} from "../middlewares/auth-middleware.js"
 import{loginValidator,registerValidator} from "../validator/auth-validator.js"
 

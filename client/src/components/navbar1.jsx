@@ -23,7 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "react-router-dom";
-
+import { useSelector } from "react-redux";
 const Navbar1 = ({
   logo = {
     url: "https://www.shadcnblocks.com",
@@ -56,9 +56,13 @@ const Navbar1 = ({
     login: { title: "Login", url: "/auth" },
     signup: { title: "Sign up", url: "/auth" },
   }
+
 }) => {
+
+  const toggleHide = useSelector((state)=> state.hideNav.hide);
+  const indicator = toggleHide ? "hidden" : "block";
   return (
-    <section className="py-4 px-10 ">
+    <section className={`py-4 px-10 ${indicator}`}>
       <div className="container">
         {/* Desktop Menu */}
         <nav className="hidden justify-between lg:flex">

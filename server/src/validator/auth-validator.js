@@ -6,61 +6,74 @@ export const loginValidator = [
     body('email')
         .trim()
         .notEmpty()
+        .withMessage('Email is required')
         .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email format'),
+        .withMessage('Invalid email format')
+        .normalizeEmail(),
     
     body('password')
         .trim()
         .notEmpty()
-        .isLength({ min: 7 })
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
-        .withMessage('Password must be at least 7 characters long, contain one lowercase letter, one uppercase letter, and one special character')
+        .withMessage('Password is required')
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 characters long')
 ]
 
 export const registerValidator = [
     body("fullname")
         .trim()
         .notEmpty()
-        .withMessage("Fullname must be at least 3 characters long"),
+        .withMessage("Fullname is required"),
     body("email")
         .trim()
         .notEmpty()
+        .withMessage("Email is required")
         .isEmail()
+        .withMessage("Invalid email format")
         .normalizeEmail()
-        .custom(value=> {
-            try {
-                const user =  userModel.findOne({email:value})
-                if(user){
-                    return Promise.reject("Email already in use")
-                }
-                return true
-            } catch (error) {
-                throw error;
+        .custom(async value => {
+            const user = await userModel.findOne({email: value});
+            if(user) {
+                throw new Error("Email already in use");
             }
-        })
-        .withMessage("Invalid email format"),
+            return true;
+        }),
     body("phone")
         .trim()
         .notEmpty()
+        .withMessage("Phone number is required")
         .isNumeric()
-        .isLength({ min: 10 })
-        .custom(value=> {
-            try {
-                const user =  userModel.findOne({phone:value})
-                if(user){
-                    return Promise.reject("Phone Number already in use")
-                }
-                return true
-            } catch (error) {
-                throw error;
+        .withMessage("Phone number must be numeric")
+        .isLength({ min: 10, max: 10 })
+        .withMessage("Phone number must be exactly 10 digits")
+        .custom(async value => {
+            const user = await userModel.findOne({phone: value});
+            if(user) {
+                throw new Error("Phone Number already in use");
             }
-        })
-        .withMessage("Phone number must be at least 10 digits long"),
-    body("password")
-        .trim()
-        .notEmpty()
-        .isLength({ min: 7 })
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
-        .withMessage("Password must be at least 7 characters long, contain one lowercase letter, one uppercase letter, and one special character"),    
+            return true;
+        }),
+ body("password")
+    .trim()
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
+    .custom((value) => {
+        // Create proper RegExp objects for each requirement
+        const hasLowercase = /[a-z]/.test(value);
+        const hasUppercase = /[A-Z]/.test(value);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+        
+        // Check if all requirements are met
+        if (!hasLowercase || !hasUppercase || !hasSpecialChar) {
+            return false;
+        }
+        return true;
+    })
+    .withMessage("Password must contain one lowercase letter, one uppercase letter, and one special character")
+    .custom(value => {
+        console.log("Password passed validation:", value);
+        return true;
+    }),
 ]

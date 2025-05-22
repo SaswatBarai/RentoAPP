@@ -5,8 +5,12 @@ import { AuthService } from "@/services/auth.service"
 import { toast } from "react-toastify"
 import { Bounce } from "react-toastify"
 import { useGoogleLogin } from "@react-oauth/google"
+import { useRegister } from "@/queries/authQueries"
 
 export const RegisterForm = ({ setIsFlipped, className = "" }) => {
+
+
+
     const [data, setData] = useState({
         email: "",
         fullname: "",
@@ -14,6 +18,7 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
         confirmPassword: "",
         password: "",
     })
+    const {mutate:register,isPending:isPendingNormal} = useRegister();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -50,11 +55,11 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
         }
     }
 
-    const handleSubmit =async  (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Submitted");
         
-
+        // Form validation on client side
         for (const key in data) {
             if (!data[key]) {
                 toast.error(`Please enter your ${key}`, {
@@ -136,46 +141,57 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
             phone: data.phone,
             password: data.password,
         }
-        const result = await AuthService.register(userdata);
-        console.log(result.data);
-        
-        if (!result.success) {
-            toast.error(result.message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
-            });
-            result;
-        }
-        
-        if (result.success) {
-            console.log("done");
-            
-            toast.success('Registration successful', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
-            });
-
-
-        }
+        register(userdata, {
+            onSuccess: () => {
+                toast.success("Registration successful!", {
+                    position: "top-center",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    transition: Bounce,
+                });
+                setTimeout(() => setIsFlipped(true), 2000); // Flip to login after registration
+            },
+        });
 
     }
     const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
-      await AuthService.loginWithGoogle(response["access_token"]);
+      const accessToken = response["access_token"];
+      try {
+        await AuthService.loginWithGoogle(accessToken);
+        // Handle success navigation here
+        toast.success("Registration successful!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+        setTimeout(() => {
+          window.location.href = "/home";
+        }, 2000);
+      } catch (error) {
+        toast.error(error.message || "Google login failed", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+      }
     },
     onError: (error) => {
       toast.error("Google login failed", {
@@ -194,8 +210,11 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
     flow: "implicit",
   });
 
+ 
+
     return (
-        <div className={`flex-1 flex flex-col justify-center items-center p-8 ${className}`}>
+        <div
+        className={`flex-1 flex flex-col justify-center items-center p-8 ${className}`}>
             <div className="w-full max-w-md space-y-6">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-blue-500">
@@ -237,8 +256,8 @@ export const RegisterForm = ({ setIsFlipped, className = "" }) => {
                         placeholder="Enter Your Confirm Password"
                     />
 
-                    <button type="submit" className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
-                        Register
+                    <button type="submit" disabled={isPendingNormal} className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                        {isPendingNormal ? "Loading..."  :  "Register"}
                     </button>
                     <div>
 

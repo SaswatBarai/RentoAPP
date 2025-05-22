@@ -2,11 +2,11 @@ import { asyncHandler } from "../utils/ayncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import userModel from "../models/users-model.js";
-import passport from "passport";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 import genrator from "generate-password";
 import { oauth2Client } from "../configs/googleConfig.js";
+import { validationResult } from "express-validator";
 
 const generateTokens = async (userId) => {
   try {
@@ -32,12 +32,16 @@ const generateTokens = async (userId) => {
 
 const register = asyncHandler(async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, errors.array()[0].msg));
+    }
+
     const { fullname, email, phone, password } = req.body;
     console.log(req.body);
 
-    if ([fullname, email, phone, password].some((val) => val?.trim() === "")) {
-      throw new ApiError(400, "All fields are required");
-    }
 
     const existUser = await userModel.findOne({
       $or: [{ phone }, { email }],
@@ -78,7 +82,7 @@ const loginUser = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log(req.body);
-    
+
     if ([email, password].some((val) => val.trim() === "")) {
       throw new ApiError(400, "All fields are required");
     }
@@ -86,30 +90,29 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!user) {
       throw new ApiResponse(401, "Invalid Credentials");
     }
-  
+
     let isMatch = await user.MatchPassword(password);
     if (!isMatch) {
       throw new ApiResponse(401, "Invalid Credentials");
     }
     console.log(isMatch);
-    
-  
+
     const { accessToken, refreshToken } = await generateTokens(user._id);
     const loggedInUser = await userModel
       .findById(user._id)
       .select("-password -createdAt -updatedAt");
-  
+
     if (!loggedInUser) {
       return res
         .status(400)
         .json(new ApiResponse(400, null, "User authentication failed"));
     }
-  
+
     const options = {
       httpOnly: true,
       secure: true,
     };
-  
+
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
@@ -126,7 +129,7 @@ const loginUser = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    throw new ApiError(500,"Server Error");
+    throw new ApiError(500, "Server Error");
   }
 });
 
@@ -166,7 +169,7 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
       if (!user) {
         // Create a new user if doesn't exist
         user = await userModel.create({
-          fullname: name || "Google User",
+          fullname: name,
           email,
           password: genrator.generate({
             length: 12,

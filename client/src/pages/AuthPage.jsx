@@ -1,13 +1,21 @@
 import { LoginForm } from "@/components/auth/LoginForm"
 import { LogoCard } from "@/components/auth/LogoCard"
 import { RegisterForm } from "@/components/auth/RegisterForm"
+import { setNav } from "@/state/slices/hideNavSlice"
+import { useEffect } from "react"
 import { useState } from "react"
+import { useDispatch } from "react-redux"
 
 export const AuthPage = () => {
     const [isFlipped, setIsFlipped] = useState(false)
+    const dispatch = useDispatch();
 
+    useEffect(()=>{
+        dispatch(setNav({hide:true}))
+    })
     return(
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div 
+        className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="w-full md:w-4/5 lg:w-4/6 h-[600px] rounded-lg shadow-2xl relative overflow-hidden bg-white">
                 <div
                     className={`flex w-full h-full transition-transform duration-700 ease-in-out ${
